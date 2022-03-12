@@ -145,8 +145,7 @@ router.get(
 router.post(
     "/calendar",
     (req, res) => {
-        res.send("Done");
-        
+
         // Require google from googleapis package.
         const { google } = require('googleapis')
 
@@ -167,11 +166,11 @@ router.post(
 
         // Create a new event start date instance for temp uses in our calendar.
         var eventStartTime = new Date()
-        eventStartTime= req.body.eventStarttime + ":00 .52z";
+        eventStartTime = req.body.eventStarttime + ":00.52z";
 
         // Create a new event end date instance for temp uses in our calendar.
         var eventEndTime = new Date()
-        eventEndTime= req.body.eventEndtime + ":00 .52z";
+        eventEndTime = req.body.eventEndtime + ":00.52z";
 
         console.log(req.body.eventStarttime)
         // console.log(req.body.eventEndtime)
@@ -183,7 +182,7 @@ router.post(
         // Create a dummy event for temp uses in our calendar
         const event = {
             summary: summary,
-            description: description,
+            location: description,
             colorId: 1,
             start: {
                 dateTime: eventStartTime,
@@ -221,8 +220,37 @@ router.post(
                             // Check for errors and log them if they exist.
                             if (err) return console.error('Error Creating Calender Event:', err)
                             // Else log that the event was created.
-                            return console.log('Calendar event successfully created.')
+                            console.log('Calendar event successfully created.')
+                            // res.send("Slot has been scheduled and mail to the interviewee has been sent")
+                            const nodemailer = require('nodemailer');
+
+                            const mailer = 'newbiesthealgorithmic@gmail.com';
+
+                            let mailTransporter = nodemailer.createTransport({
+                                service: 'gmail',
+                                auth: {
+                                    user: mailer,
+                                    pass: 'Thealgo@212'
+                                }
+                            });
+
+                            let mailDetails = {
+                                from: mailer,
+                                to: req.body.email,
+                                subject: req.body.summary,
+                                text: "You have been allocated time : from " + req.body.eventStarttime + " to " + req.body.eventEndtime
+                            };
+
+                            mailTransporter.sendMail(mailDetails, function (err, data) {
+                                if (err) {
+                                    console.log('Error Occurs ' + err);
+                                } else {
+                                    console.log('Email sent successfully');
+                                    res.send("Time slot has been successfully alloted and respective mail have been sent");
+                                }
+                            });
                         }
+                        
                     )
 
                 // If event array is not empty log that we are busy.
